@@ -33,10 +33,10 @@ The following was requested as part of the assignment:
 ## Artifacts
 ### Python Application
 
-Simple Python application that exposed 3 HTTP resources:
-* **/** - Default resource just retrurning a HTML header
+Simple Python application that exposes 3 HTTP resources:
+* **/** - Default resource just returning a HTML header
 * **/message** - This resource will return the value of an environment variable **ENV_MESSAGE**
-* **/messageFromFile** - This resource will return **MESSAGE** filed from a file stored at **/tmp/config.cfg**
+* **/messageFromFile** - This resource will return **MESSAGE** field from a file stored at **/tmp/config.cfg**
 
 #### Python Code
 ```
@@ -78,14 +78,14 @@ CMD ["python3", "hello-world.py"]
 
 ### Restart Controller
 
-The restart controller is another application written in Python that will be deployed to cluster. The controller must restart the deployments(services) when confirMap is updated with a new value
+The restart controller is another application written in Python that will be deployed to cluster. The controller must restart the deployments(services) when ConfigMap is updated with a new value
 
-1. The controller is used to watch for events for changes on cluster using the Kubernetes API.
-2. If an events is received, which is for change to **Configmap**, and the annotation **rolling.restart.controller/triggerRestart** on ConfigMap is set to *true*, it will trigger the next function responsible for restart.
-3. The restart method filters for deployments which contains the same labels for **env** and **app** as the COnfigMap. This is to ensure only apps relating to the same ConfigMap is retrieved.
+1. The controller is used to watch for events orignating from changes on cluster using the Kubernetes API.
+2. If an event is received, which is for change to **Configmap**, and the annotation **rolling.restart.controller/triggerRestart** on ConfigMap is set to *true*, it will trigger the next function responsible for restart.
+3. The restart method filters for deployments which contains the same labels for **env** and **app** as the ConfigMap. This is to ensure only apps relating to the same ConfigMap is retrieved.
 4. A loop is then done to go through all the filtered deployments
 5. If the annotation **rolling.restart.controller/restartOnTrigger** is set to *true* for the deployment, it will process restart for the deployment
-6. To restart a deployment, a change is made to current deployment manifest which will trigger the restart by Kubernetes. THis is done by adding/updating an annotation **rolling.restart.controller/restartTimestamp** on the deployment.
+6. To restart a deployment, a change is made to current deployment manifest which will trigger the restart by Kubernetes. This is done by adding/updating an annotation **rolling.restart.controller/restartTimestamp** on the deployment.
 
 #### Python Code
 
@@ -171,8 +171,8 @@ CMD ["python3", "rolling_restart_controller.py"]
 
 ### Kubernetes Deployment Manifests
 
-This section will provide steps to deploy application to Kubernetes cluster.
-It is assumed that kubeconfig is already in place for CLI to interact with Kubernetes API, and context is set to appropriate cluster and namespace
+This section will provide steps to deploy the application to Kubernetes cluster.
+It is assumed that kubeconfig is already in place for CLI to interact with Kubernetes API, and context is set to the appropriate cluster and namespace where application must be deployed to
 
 For all steps listed, command line should be opened at **$REPO_LOCATION/deployment**
 
@@ -187,13 +187,13 @@ kubectl apply -f istio-gateway.yaml
 
 To deploy the restart controller, the following command can be used:
 ```
-kubectl apply -f istio-gateway.yaml
+kubectl apply -f controller/restart-controller-deployment.yaml
 ```
 
 #### Python Application
 
 To deploy the application that was created, the following commands can be used depending on the environment.
-The commands below is one-line to apply Kustomize to base, and deploy to Kubernetes cluster
+The commands below is one-liner to apply Kustomize to base, and deploy to the Kubernetes cluster
 * **test**
 ```
 kustomize build python-app/overlays/test | kubectl apply -f -
@@ -206,13 +206,13 @@ kustomize build python-app/overlays/prod | kubectl apply -f -
 
 ## Cluster Adjustments 
 
-The above components can be deployed to a workstation or other remote clusters. THis will however require the following to be done to enable the deployment.
+The above components can be deployed to a workstation or other remote clusters. This will however require the following to be done to enable the deployment.
 
-* kubectl must be set to use the correct context before any of the kubectl commands above are executed to apply configurations to cluster. THis can be done by using the folloing command, and setting **MY_CLUSTER_NAME** accordginly to context existing in kubeconfig
+* kubectl must be set to use the correct context before any of the kubectl commands above are executed to apply configurations to cluster. This can be done by using the following command, and setting **MY_CLUSTER_NAME** accordginly to context existing in kubeconfig
   ```
   kubectl config use-context $MY_CLUSTER_NAME 
   ```
-* If airgapped environments exists, or limited access to public registries is available from clusters, the docker images used in deployments will need to change to use private registries to which the cluster has acecss. The images used for this deployment will need to pushed to these registries. If registry requires authentication, this will also require **imagePullSecrets** to be added to deployment specs.
+* If airgapped environments exists, or limited access to public registries is available from clusters, the docker images used in deployments will need to change to use private registries to which the cluster has acecss. The images used for this deployment will need to be pushed to these registries. If registry requires authentication, this will also require **imagePullSecrets** to be added to deployment specs.
 * If cluster has strict RBAC policies, **ServiceAccounts** will require appropriate **role**, **clusterrole**, **rolebinding** and/or **clusterrolebinding** to be setup
-* For the assignment on workstation, hosts file was used for DNS resolution to ***.devopsassignment.com** to forward traffic to Istion Ingress Gateway. As this is fictitious DNS, the hosts used on **VirtualServices** will need to be updated to use DNS avaialble.
-* For assignment, it is assumed to Istion Gateway is already configured for cluster - If not, Istio Ingress Gateway will need to be deployed to cluster.
+* For the assignment on workstation, hosts file was used for DNS resolution to ***.devopsassignment.com** to forward traffic to Istio Ingress Gateway. As this is fictitious DNS, the hosts used on **VirtualServices** will need to be updated to use DNS avaialble.
+* For assignment, it is assumed to Istio Gateway is already configured for cluster - If not, Istio Ingress Gateway will need to be deployed to cluster.
