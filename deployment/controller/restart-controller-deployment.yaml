@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rolling-restart-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rolling-restart-controller
+  template:
+    metadata:
+      labels:
+        app: rolling-restart-controller
+    spec:
+      containers:
+        - name: rolling-restart-controller-container
+          image: markusdkruger/devops-assignment-restart-controller:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"

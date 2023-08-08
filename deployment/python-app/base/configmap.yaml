@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helloworld-config
+  annotations:
+    rolling.restart.controller/triggerRestart: "true"
+data:
+  ENV_MESSAGE: "Hello World Python App for Devops Assignment! This message was read from configmap mounted as environment variable"
+  config.cfg: | 
+    MESSAGE="Hello World Python App for Devops Assignment! This message was read from configmap mounted as a mounted-volume file"

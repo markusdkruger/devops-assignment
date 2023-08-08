@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloworld-deployment
+  annotations:
+    rolling.restart.controller/restartOnTrigger: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: helloworld
+  template:
+    spec:
+      serviceAccountName: hello-world-serviceaccount
+      containers:
+        - name: helloworld-container
+          image: markusdkruger/devops-assignment-python-app:latest
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: helloworld-config
+          env:
+          - name: ENV_MESSAGE
+            valueFrom:
+              configMapKeyRef:
+                name: helloworld-config
+                key: ENV_MESSAGE
+          volumeMounts:
+          - name: config-file-mount
+            mountPath: /tmp
+      volumes:
+        - name: config-file-mount
+          configMap:
+            name: helloworld-config

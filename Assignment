@@ -1,0 +1,12 @@
+Prepare manifests for two different kubernetes environments test and prod
+These manifests will be rolled out on the same cluster and the same namespace
+Use Kustomize to generate manifests - They should share as much as possible and rely on patches for environment specific configurations
+The manifests must have the following labels set: 
+    env must have values 'test' or 'prod'. 
+    app must have value helloworld
+Service is based on a python application that exposes a HTTP GET endpoint, with the response returning content of message stored in ConfigMap
+The service must be accessible from outside the cluster via an Istio Gateway
+
+
+Mention any points that will require to be adjusted in different contexts (workstation vs other cluster)
+Design a controller that watches above ConfigMap and do a rolling restart of the service in case of change:
